@@ -42,6 +42,10 @@ set(GENERATED
         generated/soapRecordingBindingProxy.h
         generated/soapRecordingBindingService.cpp
         generated/soapRecordingBindingService.h
+        generated/soapRemoteDiscoveryBindingProxy.cpp
+        generated/soapRemoteDiscoveryBindingProxy.h
+        generated/soapRemoteDiscoveryBindingService.cpp
+        generated/soapRemoteDiscoveryBindingService.h
         generated/soapReplayBindingProxy.cpp
         generated/soapReplayBindingProxy.h
         generated/soapReplayBindingService.cpp
@@ -55,6 +59,10 @@ set(GENERATED
         generated/soapSearchBindingService.cpp
         generated/soapSearchBindingService.h
         generated/soapStub.h
+        generated/soapwsddProxy.cpp
+        generated/soapwsddProxy.h
+        generated/soapwsddService.cpp
+        generated/soapwsddService.h
 )
 
 set(GSOAP gsoap/chrono_duration.cpp

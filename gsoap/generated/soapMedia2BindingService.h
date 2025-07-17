@@ -69,7 +69,7 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         /// Disables and removes SOAP Header from message by setting soap->header = NULL
         virtual void soap_noheader();
         /// Add SOAP Header to message
-        virtual void soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance);
+        virtual void soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance);
         /// Get SOAP Header structure (i.e. soap->header, which is NULL when absent)
         virtual ::SOAP_ENV__Header *soap_header();
     #ifndef WITH_NOIO
@@ -160,6 +160,9 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         /// Web service operation 'SetAudioDecoderConfiguration' implementation, should return SOAP_OK or error code
         virtual int SetAudioDecoderConfiguration(_ns1__SetAudioDecoderConfiguration *ns1__SetAudioDecoderConfiguration, ns1__SetConfigurationResponse &ns1__SetAudioDecoderConfigurationResponse) SOAP_PURE_VIRTUAL;
         //
+        /// Web service operation 'SetEQPreset' implementation, should return SOAP_OK or error code
+        virtual int SetEQPreset(_ns1__SetEQPresetConfiguration *ns1__SetEQPresetConfiguration, ns1__SetConfigurationResponse &ns1__SetEQPresetConfigurationResponse) SOAP_PURE_VIRTUAL;
+        //
         /// Web service operation 'GetVideoSourceConfigurationOptions' implementation, should return SOAP_OK or error code
         virtual int GetVideoSourceConfigurationOptions(ns1__GetConfiguration *ns1__GetVideoSourceConfigurationOptions, _ns1__GetVideoSourceConfigurationOptionsResponse &ns1__GetVideoSourceConfigurationOptionsResponse) SOAP_PURE_VIRTUAL;
         //
@@ -240,5 +243,23 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         //
         /// Web service operation 'SetWebRTCConfigurations' implementation, should return SOAP_OK or error code
         virtual int SetWebRTCConfigurations(_ns1__SetWebRTCConfigurations *ns1__SetWebRTCConfigurations, _ns1__SetWebRTCConfigurationsResponse &ns1__SetWebRTCConfigurationsResponse) SOAP_PURE_VIRTUAL;
+        //
+        /// Web service operation 'GetAudioClips' implementation, should return SOAP_OK or error code
+        virtual int GetAudioClips(_ns1__GetAudioClips *ns1__GetAudioClips, _ns1__GetAudioClipsResponse &ns1__GetAudioClipsResponse) SOAP_PURE_VIRTUAL;
+        //
+        /// Web service operation 'AddAudioClip' implementation, should return SOAP_OK or error code
+        virtual int AddAudioClip(_ns1__AddAudioClip *ns1__AddAudioClip, _ns1__AddAudioClipResponse &ns1__AddAudioClipResponse) SOAP_PURE_VIRTUAL;
+        //
+        /// Web service operation 'SetAudioClip' implementation, should return SOAP_OK or error code
+        virtual int SetAudioClip(_ns1__SetAudioClip *ns1__SetAudioClip, _ns1__SetAudioClipResponse &ns1__SetAudioClipResponse) SOAP_PURE_VIRTUAL;
+        //
+        /// Web service operation 'DeleteAudioClip' implementation, should return SOAP_OK or error code
+        virtual int DeleteAudioClip(_ns1__DeleteAudioClip *ns1__DeleteAudioClip, _ns1__DeleteAudioClipResponse &ns1__DeleteAudioClipResponse) SOAP_PURE_VIRTUAL;
+        //
+        /// Web service operation 'PlayAudioClip' implementation, should return SOAP_OK or error code
+        virtual int PlayAudioClip(_ns1__PlayAudioClip *ns1__PlayAudioClip, _ns1__PlayAudioClipResponse &ns1__PlayAudioClipResponse) SOAP_PURE_VIRTUAL;
+        //
+        /// Web service operation 'GetPlayingAudioClips' implementation, should return SOAP_OK or error code
+        virtual int GetPlayingAudioClips(_ns1__GetPlayingAudioClips *ns1__GetPlayingAudioClips, _ns1__GetPlayingAudioClipsResponse &ns1__GetPlayingAudioClipsResponse) SOAP_PURE_VIRTUAL;
     };
 #endif

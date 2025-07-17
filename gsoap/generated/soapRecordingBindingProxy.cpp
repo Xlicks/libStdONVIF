@@ -88,7 +88,10 @@ void RecordingBindingProxy::RecordingBindingProxy_init(soap_mode imode, soap_mod
         { "xenc", "http://www.w3.org/2001/04/xmlenc#", NULL, NULL },
         { "wsc", "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512", "http://schemas.xmlsoap.org/ws/2005/02/sc", NULL },
         { "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", NULL },
+        { "wsa", "http://schemas.xmlsoap.org/ws/2004/08/addressing", "http://www.w3.org/2005/08/addressing", NULL },
+        { "wsdd", "http://schemas.xmlsoap.org/ws/2005/04/discovery", NULL, NULL },
         { "chan", "http://schemas.microsoft.com/ws/2005/02/duplex", NULL, NULL },
+        { "wsdd10", "http://tempuri.org/wsdd10.xsd", NULL, NULL },
         { "wsa5", "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing", NULL },
         { "wsrfr", "http://docs.oasis-open.org/wsrf/r-2", NULL, NULL },
         { "ns2", "http://www.onvif.org/ver20/analytics/humanface", NULL, NULL },
@@ -101,6 +104,7 @@ void RecordingBindingProxy::RecordingBindingProxy_init(soap_mode imode, soap_mod
         { "ns1", "http://www.onvif.org/ver20/media/wsdl", NULL, NULL },
         { "tad", "http://www.onvif.org/ver10/analyticsdevice/wsdl", NULL, NULL },
         { "tan", "http://www.onvif.org/ver20/analytics/wsdl", NULL, NULL },
+        { "tdn", "http://www.onvif.org/ver10/network/wsdl", NULL, NULL },
         { "tds", "http://www.onvif.org/ver10/device/wsdl", NULL, NULL },
         { "tev", "http://www.onvif.org/ver10/events/wsdl", NULL, NULL },
         { "wsnt", "http://docs.oasis-open.org/wsn/b-2", NULL, NULL },
@@ -153,10 +157,18 @@ void RecordingBindingProxy::soap_noheader()
 {	this->soap->header = NULL;
 }
 
-void RecordingBindingProxy::soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
+void RecordingBindingProxy::soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
 {
 	::soap_header(this->soap);
 	this->soap->header->wsse__Security = wsse__Security;
+	this->soap->header->wsa__MessageID = wsa__MessageID;
+	this->soap->header->wsa__RelatesTo = wsa__RelatesTo;
+	this->soap->header->wsa__From = wsa__From;
+	this->soap->header->wsa__ReplyTo = wsa__ReplyTo;
+	this->soap->header->wsa__FaultTo = wsa__FaultTo;
+	this->soap->header->wsa__To = wsa__To;
+	this->soap->header->wsa__Action = wsa__Action;
+	this->soap->header->wsdd__AppSequence = wsdd__AppSequence;
 	this->soap->header->wsa5__MessageID = wsa5__MessageID;
 	this->soap->header->wsa5__RelatesTo = wsa5__RelatesTo;
 	this->soap->header->wsa5__From = wsa5__From;
@@ -1357,6 +1369,61 @@ int RecordingBindingProxy::recv_GetExportRecordedDataState(_trc__GetExportRecord
 	 || soap_body_begin_in(soap))
 		return soap_closesock(soap);
 	trc__GetExportRecordedDataStateResponse.soap_get(soap, "trc:GetExportRecordedDataStateResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int RecordingBindingProxy::send_OverrideSegmentDuration(const char *soap_endpoint_url, const char *soap_action, _trc__OverrideSegmentDuration *trc__OverrideSegmentDuration)
+{
+	struct __trc__OverrideSegmentDuration soap_tmp___trc__OverrideSegmentDuration;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver10/recording/wsdl/OverrideSegmentDuration";
+	soap_tmp___trc__OverrideSegmentDuration.trc__OverrideSegmentDuration = trc__OverrideSegmentDuration;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___trc__OverrideSegmentDuration(soap, &soap_tmp___trc__OverrideSegmentDuration);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___trc__OverrideSegmentDuration(soap, &soap_tmp___trc__OverrideSegmentDuration, "-trc:OverrideSegmentDuration", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___trc__OverrideSegmentDuration(soap, &soap_tmp___trc__OverrideSegmentDuration, "-trc:OverrideSegmentDuration", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int RecordingBindingProxy::recv_OverrideSegmentDuration(_trc__OverrideSegmentDurationResponse &trc__OverrideSegmentDurationResponse)
+{
+	trc__OverrideSegmentDurationResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	trc__OverrideSegmentDurationResponse.soap_get(soap, "trc:OverrideSegmentDurationResponse", NULL);
 	if (soap->error)
 		return soap_recv_fault(soap, 0);
 	if (soap_body_end_in(soap)

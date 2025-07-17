@@ -65,7 +65,10 @@ void Media2BindingService::Media2BindingService_init(soap_mode imode, soap_mode 
         { "xenc", "http://www.w3.org/2001/04/xmlenc#", NULL, NULL },
         { "wsc", "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512", "http://schemas.xmlsoap.org/ws/2005/02/sc", NULL },
         { "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", NULL },
+        { "wsa", "http://schemas.xmlsoap.org/ws/2004/08/addressing", "http://www.w3.org/2005/08/addressing", NULL },
+        { "wsdd", "http://schemas.xmlsoap.org/ws/2005/04/discovery", NULL, NULL },
         { "chan", "http://schemas.microsoft.com/ws/2005/02/duplex", NULL, NULL },
+        { "wsdd10", "http://tempuri.org/wsdd10.xsd", NULL, NULL },
         { "wsa5", "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing", NULL },
         { "wsrfr", "http://docs.oasis-open.org/wsrf/r-2", NULL, NULL },
         { "ns2", "http://www.onvif.org/ver20/analytics/humanface", NULL, NULL },
@@ -78,6 +81,7 @@ void Media2BindingService::Media2BindingService_init(soap_mode imode, soap_mode 
         { "ns1", "http://www.onvif.org/ver20/media/wsdl", NULL, NULL },
         { "tad", "http://www.onvif.org/ver10/analyticsdevice/wsdl", NULL, NULL },
         { "tan", "http://www.onvif.org/ver20/analytics/wsdl", NULL, NULL },
+        { "tdn", "http://www.onvif.org/ver10/network/wsdl", NULL, NULL },
         { "tds", "http://www.onvif.org/ver10/device/wsdl", NULL, NULL },
         { "tev", "http://www.onvif.org/ver10/events/wsdl", NULL, NULL },
         { "wsnt", "http://docs.oasis-open.org/wsn/b-2", NULL, NULL },
@@ -171,10 +175,18 @@ void Media2BindingService::soap_noheader()
 {	this->soap->header = NULL;
 }
 
-void Media2BindingService::soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
+void Media2BindingService::soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
 {
 	::soap_header(this->soap);
 	this->soap->header->wsse__Security = wsse__Security;
+	this->soap->header->wsa__MessageID = wsa__MessageID;
+	this->soap->header->wsa__RelatesTo = wsa__RelatesTo;
+	this->soap->header->wsa__From = wsa__From;
+	this->soap->header->wsa__ReplyTo = wsa__ReplyTo;
+	this->soap->header->wsa__FaultTo = wsa__FaultTo;
+	this->soap->header->wsa__To = wsa__To;
+	this->soap->header->wsa__Action = wsa__Action;
+	this->soap->header->wsdd__AppSequence = wsdd__AppSequence;
 	this->soap->header->wsa5__MessageID = wsa5__MessageID;
 	this->soap->header->wsa5__RelatesTo = wsa5__RelatesTo;
 	this->soap->header->wsa5__From = wsa5__From;
@@ -294,6 +306,7 @@ static int serve___ns1__SetAudioEncoderConfiguration(struct soap*, Media2Binding
 static int serve___ns1__SetMetadataConfiguration(struct soap*, Media2BindingService*);
 static int serve___ns1__SetAudioOutputConfiguration(struct soap*, Media2BindingService*);
 static int serve___ns1__SetAudioDecoderConfiguration(struct soap*, Media2BindingService*);
+static int serve___ns1__SetEQPreset(struct soap*, Media2BindingService*);
 static int serve___ns1__GetVideoSourceConfigurationOptions(struct soap*, Media2BindingService*);
 static int serve___ns1__GetVideoEncoderConfigurationOptions(struct soap*, Media2BindingService*);
 static int serve___ns1__GetAudioSourceConfigurationOptions(struct soap*, Media2BindingService*);
@@ -321,6 +334,12 @@ static int serve___ns1__CreateMask(struct soap*, Media2BindingService*);
 static int serve___ns1__DeleteMask(struct soap*, Media2BindingService*);
 static int serve___ns1__GetWebRTCConfigurations(struct soap*, Media2BindingService*);
 static int serve___ns1__SetWebRTCConfigurations(struct soap*, Media2BindingService*);
+static int serve___ns1__GetAudioClips(struct soap*, Media2BindingService*);
+static int serve___ns1__AddAudioClip(struct soap*, Media2BindingService*);
+static int serve___ns1__SetAudioClip(struct soap*, Media2BindingService*);
+static int serve___ns1__DeleteAudioClip(struct soap*, Media2BindingService*);
+static int serve___ns1__PlayAudioClip(struct soap*, Media2BindingService*);
+static int serve___ns1__GetPlayingAudioClips(struct soap*, Media2BindingService*);
 
 int Media2BindingService::dispatch()
 {	return dispatch(this->soap);
@@ -331,104 +350,118 @@ int Media2BindingService::dispatch(struct soap* soap)
 	Media2BindingService_init(soap->imode, soap->omode);
 	if (soap->action)
 	{
-		const char *soap_action[] = { "http://www.onvif.org/ver20/media/wsdl/AddConfiguration", "http://www.onvif.org/ver20/media/wsdl/CreateMask", "http://www.onvif.org/ver20/media/wsdl/CreateOSD", "http://www.onvif.org/ver20/media/wsdl/CreateProfile", "http://www.onvif.org/ver20/media/wsdl/DeleteMask", "http://www.onvif.org/ver20/media/wsdl/DeleteOSD", "http://www.onvif.org/ver20/media/wsdl/DeleteProfile", "http://www.onvif.org/ver20/media/wsdl/GetAnalyticsConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioDecoderConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioDecoderConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioEncoderConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioEncoderConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioOutputConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioOutputConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioSourceConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioSourceConfigurations/", "http://www.onvif.org/ver20/media/wsdl/GetMaskOptions", "http://www.onvif.org/ver20/media/wsdl/GetMasks", "http://www.onvif.org/ver20/media/wsdl/GetMetadataConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetMetadataConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetOSDOptions", "http://www.onvif.org/ver20/media/wsdl/GetOSDs", "http://www.onvif.org/ver20/media/wsdl/GetProfiles", "http://www.onvif.org/ver20/media/wsdl/GetServiceCapabilities", "http://www.onvif.org/ver20/media/wsdl/GetSnapshotUri", "http://www.onvif.org/ver20/media/wsdl/GetStreamUri", "http://www.onvif.org/ver20/media/wsdl/GetVideoEncoderConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetVideoEncoderConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetVideoEncoderInstances", "http://www.onvif.org/ver20/media/wsdl/GetVideoSourceConfigurationOptions/", "http://www.onvif.org/ver20/media/wsdl/GetVideoSourceConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetVideoSourceModes", "http://www.onvif.org/ver20/media/wsdl/GetWebRTCConfigurations", "http://www.onvif.org/ver20/media/wsdl/RemoveConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioDecoderConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioEncoderConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioOutputConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioSourceConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetMask", "http://www.onvif.org/ver20/media/wsdl/SetMetadataConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetOSD", "http://www.onvif.org/ver20/media/wsdl/SetSynchronizationPoint", "http://www.onvif.org/ver20/media/wsdl/SetVideoEncoderConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetVideoSourceConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetVideoSourceMode", "http://www.onvif.org/ver20/media/wsdl/SetWebRTCConfigurations", "http://www.onvif.org/ver20/media/wsdl/StartMulticastStreaming", "http://www.onvif.org/ver20/media/wsdl/StopMulticastStreaming",  };
-		switch (soap_binary_search_string(soap_action, 48, soap->action))
+		const char *soap_action[] = { "http://www.onvif.org/ver20/media/wsdl/AddAudioClip", "http://www.onvif.org/ver20/media/wsdl/AddConfiguration", "http://www.onvif.org/ver20/media/wsdl/CreateMask", "http://www.onvif.org/ver20/media/wsdl/CreateOSD", "http://www.onvif.org/ver20/media/wsdl/CreateProfile", "http://www.onvif.org/ver20/media/wsdl/DeleteAudioClip", "http://www.onvif.org/ver20/media/wsdl/DeleteMask", "http://www.onvif.org/ver20/media/wsdl/DeleteOSD", "http://www.onvif.org/ver20/media/wsdl/DeleteProfile", "http://www.onvif.org/ver20/media/wsdl/GetAnalyticsConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioClips", "http://www.onvif.org/ver20/media/wsdl/GetAudioDecoderConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioDecoderConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioEncoderConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioEncoderConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioOutputConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioOutputConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetAudioSourceConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetAudioSourceConfigurations/", "http://www.onvif.org/ver20/media/wsdl/GetMaskOptions", "http://www.onvif.org/ver20/media/wsdl/GetMasks", "http://www.onvif.org/ver20/media/wsdl/GetMetadataConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetMetadataConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetOSDOptions", "http://www.onvif.org/ver20/media/wsdl/GetOSDs", "http://www.onvif.org/ver20/media/wsdl/GetPlayingAudioClips", "http://www.onvif.org/ver20/media/wsdl/GetProfiles", "http://www.onvif.org/ver20/media/wsdl/GetServiceCapabilities", "http://www.onvif.org/ver20/media/wsdl/GetSnapshotUri", "http://www.onvif.org/ver20/media/wsdl/GetStreamUri", "http://www.onvif.org/ver20/media/wsdl/GetVideoEncoderConfigurationOptions", "http://www.onvif.org/ver20/media/wsdl/GetVideoEncoderConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetVideoEncoderInstances", "http://www.onvif.org/ver20/media/wsdl/GetVideoSourceConfigurationOptions/", "http://www.onvif.org/ver20/media/wsdl/GetVideoSourceConfigurations", "http://www.onvif.org/ver20/media/wsdl/GetVideoSourceModes", "http://www.onvif.org/ver20/media/wsdl/GetWebRTCConfigurations", "http://www.onvif.org/ver20/media/wsdl/PlayAudioClip", "http://www.onvif.org/ver20/media/wsdl/RemoveConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioClip", "http://www.onvif.org/ver20/media/wsdl/SetAudioDecoderConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioEncoderConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioOutputConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetAudioSourceConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetEQPreset", "http://www.onvif.org/ver20/media/wsdl/SetMask", "http://www.onvif.org/ver20/media/wsdl/SetMetadataConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetOSD", "http://www.onvif.org/ver20/media/wsdl/SetSynchronizationPoint", "http://www.onvif.org/ver20/media/wsdl/SetVideoEncoderConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetVideoSourceConfiguration", "http://www.onvif.org/ver20/media/wsdl/SetVideoSourceMode", "http://www.onvif.org/ver20/media/wsdl/SetWebRTCConfigurations", "http://www.onvif.org/ver20/media/wsdl/StartMulticastStreaming", "http://www.onvif.org/ver20/media/wsdl/StopMulticastStreaming",  };
+		switch (soap_binary_search_string(soap_action, 55, soap->action))
 		{
 			case 0:	
-				return serve___ns1__AddConfiguration(soap, this);
+				return serve___ns1__AddAudioClip(soap, this);
 			case 1:	
-				return serve___ns1__CreateMask(soap, this);
+				return serve___ns1__AddConfiguration(soap, this);
 			case 2:	
-				return serve___ns1__CreateOSD(soap, this);
+				return serve___ns1__CreateMask(soap, this);
 			case 3:	
-				return serve___ns1__CreateProfile(soap, this);
+				return serve___ns1__CreateOSD(soap, this);
 			case 4:	
-				return serve___ns1__DeleteMask(soap, this);
+				return serve___ns1__CreateProfile(soap, this);
 			case 5:	
-				return serve___ns1__DeleteOSD(soap, this);
+				return serve___ns1__DeleteAudioClip(soap, this);
 			case 6:	
-				return serve___ns1__DeleteProfile(soap, this);
+				return serve___ns1__DeleteMask(soap, this);
 			case 7:	
-				return serve___ns1__GetAnalyticsConfigurations(soap, this);
+				return serve___ns1__DeleteOSD(soap, this);
 			case 8:	
-				return serve___ns1__GetAudioDecoderConfigurationOptions(soap, this);
+				return serve___ns1__DeleteProfile(soap, this);
 			case 9:	
-				return serve___ns1__GetAudioDecoderConfigurations(soap, this);
+				return serve___ns1__GetAnalyticsConfigurations(soap, this);
 			case 10:	
-				return serve___ns1__GetAudioEncoderConfigurationOptions(soap, this);
+				return serve___ns1__GetAudioClips(soap, this);
 			case 11:	
-				return serve___ns1__GetAudioEncoderConfigurations(soap, this);
+				return serve___ns1__GetAudioDecoderConfigurationOptions(soap, this);
 			case 12:	
-				return serve___ns1__GetAudioOutputConfigurationOptions(soap, this);
+				return serve___ns1__GetAudioDecoderConfigurations(soap, this);
 			case 13:	
-				return serve___ns1__GetAudioOutputConfigurations(soap, this);
+				return serve___ns1__GetAudioEncoderConfigurationOptions(soap, this);
 			case 14:	
-				return serve___ns1__GetAudioSourceConfigurationOptions(soap, this);
+				return serve___ns1__GetAudioEncoderConfigurations(soap, this);
 			case 15:	
-				return serve___ns1__GetAudioSourceConfigurations(soap, this);
+				return serve___ns1__GetAudioOutputConfigurationOptions(soap, this);
 			case 16:	
-				return serve___ns1__GetMaskOptions(soap, this);
+				return serve___ns1__GetAudioOutputConfigurations(soap, this);
 			case 17:	
-				return serve___ns1__GetMasks(soap, this);
+				return serve___ns1__GetAudioSourceConfigurationOptions(soap, this);
 			case 18:	
-				return serve___ns1__GetMetadataConfigurationOptions(soap, this);
+				return serve___ns1__GetAudioSourceConfigurations(soap, this);
 			case 19:	
-				return serve___ns1__GetMetadataConfigurations(soap, this);
+				return serve___ns1__GetMaskOptions(soap, this);
 			case 20:	
-				return serve___ns1__GetOSDOptions(soap, this);
+				return serve___ns1__GetMasks(soap, this);
 			case 21:	
-				return serve___ns1__GetOSDs(soap, this);
+				return serve___ns1__GetMetadataConfigurationOptions(soap, this);
 			case 22:	
-				return serve___ns1__GetProfiles(soap, this);
+				return serve___ns1__GetMetadataConfigurations(soap, this);
 			case 23:	
-				return serve___ns1__GetServiceCapabilities(soap, this);
+				return serve___ns1__GetOSDOptions(soap, this);
 			case 24:	
-				return serve___ns1__GetSnapshotUri(soap, this);
+				return serve___ns1__GetOSDs(soap, this);
 			case 25:	
-				return serve___ns1__GetStreamUri(soap, this);
+				return serve___ns1__GetPlayingAudioClips(soap, this);
 			case 26:	
-				return serve___ns1__GetVideoEncoderConfigurationOptions(soap, this);
+				return serve___ns1__GetProfiles(soap, this);
 			case 27:	
-				return serve___ns1__GetVideoEncoderConfigurations(soap, this);
+				return serve___ns1__GetServiceCapabilities(soap, this);
 			case 28:	
-				return serve___ns1__GetVideoEncoderInstances(soap, this);
+				return serve___ns1__GetSnapshotUri(soap, this);
 			case 29:	
-				return serve___ns1__GetVideoSourceConfigurationOptions(soap, this);
+				return serve___ns1__GetStreamUri(soap, this);
 			case 30:	
-				return serve___ns1__GetVideoSourceConfigurations(soap, this);
+				return serve___ns1__GetVideoEncoderConfigurationOptions(soap, this);
 			case 31:	
-				return serve___ns1__GetVideoSourceModes(soap, this);
+				return serve___ns1__GetVideoEncoderConfigurations(soap, this);
 			case 32:	
-				return serve___ns1__GetWebRTCConfigurations(soap, this);
+				return serve___ns1__GetVideoEncoderInstances(soap, this);
 			case 33:	
-				return serve___ns1__RemoveConfiguration(soap, this);
+				return serve___ns1__GetVideoSourceConfigurationOptions(soap, this);
 			case 34:	
-				return serve___ns1__SetAudioDecoderConfiguration(soap, this);
+				return serve___ns1__GetVideoSourceConfigurations(soap, this);
 			case 35:	
-				return serve___ns1__SetAudioEncoderConfiguration(soap, this);
+				return serve___ns1__GetVideoSourceModes(soap, this);
 			case 36:	
-				return serve___ns1__SetAudioOutputConfiguration(soap, this);
+				return serve___ns1__GetWebRTCConfigurations(soap, this);
 			case 37:	
-				return serve___ns1__SetAudioSourceConfiguration(soap, this);
+				return serve___ns1__PlayAudioClip(soap, this);
 			case 38:	
-				return serve___ns1__SetMask(soap, this);
+				return serve___ns1__RemoveConfiguration(soap, this);
 			case 39:	
-				return serve___ns1__SetMetadataConfiguration(soap, this);
+				return serve___ns1__SetAudioClip(soap, this);
 			case 40:	
-				return serve___ns1__SetOSD(soap, this);
+				return serve___ns1__SetAudioDecoderConfiguration(soap, this);
 			case 41:	
-				return serve___ns1__SetSynchronizationPoint(soap, this);
+				return serve___ns1__SetAudioEncoderConfiguration(soap, this);
 			case 42:	
-				return serve___ns1__SetVideoEncoderConfiguration(soap, this);
+				return serve___ns1__SetAudioOutputConfiguration(soap, this);
 			case 43:	
-				return serve___ns1__SetVideoSourceConfiguration(soap, this);
+				return serve___ns1__SetAudioSourceConfiguration(soap, this);
 			case 44:	
-				return serve___ns1__SetVideoSourceMode(soap, this);
+				return serve___ns1__SetEQPreset(soap, this);
 			case 45:	
-				return serve___ns1__SetWebRTCConfigurations(soap, this);
+				return serve___ns1__SetMask(soap, this);
 			case 46:	
-				return serve___ns1__StartMulticastStreaming(soap, this);
+				return serve___ns1__SetMetadataConfiguration(soap, this);
 			case 47:	
+				return serve___ns1__SetOSD(soap, this);
+			case 48:	
+				return serve___ns1__SetSynchronizationPoint(soap, this);
+			case 49:	
+				return serve___ns1__SetVideoEncoderConfiguration(soap, this);
+			case 50:	
+				return serve___ns1__SetVideoSourceConfiguration(soap, this);
+			case 51:	
+				return serve___ns1__SetVideoSourceMode(soap, this);
+			case 52:	
+				return serve___ns1__SetWebRTCConfigurations(soap, this);
+			case 53:	
+				return serve___ns1__StartMulticastStreaming(soap, this);
+			case 54:	
 				return serve___ns1__StopMulticastStreaming(soap, this);
 		}
 	}
@@ -475,6 +508,8 @@ int Media2BindingService::dispatch(struct soap* soap)
 		return serve___ns1__SetAudioOutputConfiguration(soap, this);
 	if (!soap_match_tag(soap, soap->tag, "ns1:SetAudioDecoderConfiguration"))
 		return serve___ns1__SetAudioDecoderConfiguration(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:SetEQPresetConfiguration"))
+		return serve___ns1__SetEQPreset(soap, this);
 	if (!soap_match_tag(soap, soap->tag, "ns1:GetVideoSourceConfigurationOptions"))
 		return serve___ns1__GetVideoSourceConfigurationOptions(soap, this);
 	if (!soap_match_tag(soap, soap->tag, "ns1:GetVideoEncoderConfigurationOptions"))
@@ -529,6 +564,18 @@ int Media2BindingService::dispatch(struct soap* soap)
 		return serve___ns1__GetWebRTCConfigurations(soap, this);
 	if (!soap_match_tag(soap, soap->tag, "ns1:SetWebRTCConfigurations"))
 		return serve___ns1__SetWebRTCConfigurations(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:GetAudioClips"))
+		return serve___ns1__GetAudioClips(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:AddAudioClip"))
+		return serve___ns1__AddAudioClip(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:SetAudioClip"))
+		return serve___ns1__SetAudioClip(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:DeleteAudioClip"))
+		return serve___ns1__DeleteAudioClip(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:PlayAudioClip"))
+		return serve___ns1__PlayAudioClip(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "ns1:GetPlayingAudioClips"))
+		return serve___ns1__GetPlayingAudioClips(soap, this);
 	return soap->error = SOAP_NO_METHOD;
 }
 
@@ -1386,6 +1433,47 @@ static int serve___ns1__SetAudioDecoderConfiguration(struct soap *soap, Media2Bi
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || ns1__SetAudioDecoderConfigurationResponse.soap_put(soap, "ns1:SetAudioDecoderConfigurationResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__SetEQPreset(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__SetEQPreset soap_tmp___ns1__SetEQPreset;
+	ns1__SetConfigurationResponse ns1__SetEQPresetConfigurationResponse;
+	ns1__SetEQPresetConfigurationResponse.soap_default(soap);
+	soap_default___ns1__SetEQPreset(soap, &soap_tmp___ns1__SetEQPreset);
+	if (!soap_get___ns1__SetEQPreset(soap, &soap_tmp___ns1__SetEQPreset, "-ns1:SetEQPreset", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->SetEQPreset(soap_tmp___ns1__SetEQPreset.ns1__SetEQPresetConfiguration, ns1__SetEQPresetConfigurationResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__SetEQPresetConfigurationResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__SetEQPresetConfigurationResponse.soap_put(soap, "ns1:SetEQPresetConfigurationResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__SetEQPresetConfigurationResponse.soap_put(soap, "ns1:SetEQPresetConfigurationResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
@@ -2493,6 +2581,252 @@ static int serve___ns1__SetWebRTCConfigurations(struct soap *soap, Media2Binding
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || ns1__SetWebRTCConfigurationsResponse.soap_put(soap, "ns1:SetWebRTCConfigurationsResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__GetAudioClips(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__GetAudioClips soap_tmp___ns1__GetAudioClips;
+	_ns1__GetAudioClipsResponse ns1__GetAudioClipsResponse;
+	ns1__GetAudioClipsResponse.soap_default(soap);
+	soap_default___ns1__GetAudioClips(soap, &soap_tmp___ns1__GetAudioClips);
+	if (!soap_get___ns1__GetAudioClips(soap, &soap_tmp___ns1__GetAudioClips, "-ns1:GetAudioClips", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->GetAudioClips(soap_tmp___ns1__GetAudioClips.ns1__GetAudioClips, ns1__GetAudioClipsResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__GetAudioClipsResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__GetAudioClipsResponse.soap_put(soap, "ns1:GetAudioClipsResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__GetAudioClipsResponse.soap_put(soap, "ns1:GetAudioClipsResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__AddAudioClip(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__AddAudioClip soap_tmp___ns1__AddAudioClip;
+	_ns1__AddAudioClipResponse ns1__AddAudioClipResponse;
+	ns1__AddAudioClipResponse.soap_default(soap);
+	soap_default___ns1__AddAudioClip(soap, &soap_tmp___ns1__AddAudioClip);
+	if (!soap_get___ns1__AddAudioClip(soap, &soap_tmp___ns1__AddAudioClip, "-ns1:AddAudioClip", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->AddAudioClip(soap_tmp___ns1__AddAudioClip.ns1__AddAudioClip, ns1__AddAudioClipResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__AddAudioClipResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__AddAudioClipResponse.soap_put(soap, "ns1:AddAudioClipResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__AddAudioClipResponse.soap_put(soap, "ns1:AddAudioClipResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__SetAudioClip(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__SetAudioClip soap_tmp___ns1__SetAudioClip;
+	_ns1__SetAudioClipResponse ns1__SetAudioClipResponse;
+	ns1__SetAudioClipResponse.soap_default(soap);
+	soap_default___ns1__SetAudioClip(soap, &soap_tmp___ns1__SetAudioClip);
+	if (!soap_get___ns1__SetAudioClip(soap, &soap_tmp___ns1__SetAudioClip, "-ns1:SetAudioClip", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->SetAudioClip(soap_tmp___ns1__SetAudioClip.ns1__SetAudioClip, ns1__SetAudioClipResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__SetAudioClipResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__SetAudioClipResponse.soap_put(soap, "ns1:SetAudioClipResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__SetAudioClipResponse.soap_put(soap, "ns1:SetAudioClipResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__DeleteAudioClip(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__DeleteAudioClip soap_tmp___ns1__DeleteAudioClip;
+	_ns1__DeleteAudioClipResponse ns1__DeleteAudioClipResponse;
+	ns1__DeleteAudioClipResponse.soap_default(soap);
+	soap_default___ns1__DeleteAudioClip(soap, &soap_tmp___ns1__DeleteAudioClip);
+	if (!soap_get___ns1__DeleteAudioClip(soap, &soap_tmp___ns1__DeleteAudioClip, "-ns1:DeleteAudioClip", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->DeleteAudioClip(soap_tmp___ns1__DeleteAudioClip.ns1__DeleteAudioClip, ns1__DeleteAudioClipResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__DeleteAudioClipResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__DeleteAudioClipResponse.soap_put(soap, "ns1:DeleteAudioClipResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__DeleteAudioClipResponse.soap_put(soap, "ns1:DeleteAudioClipResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__PlayAudioClip(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__PlayAudioClip soap_tmp___ns1__PlayAudioClip;
+	_ns1__PlayAudioClipResponse ns1__PlayAudioClipResponse;
+	ns1__PlayAudioClipResponse.soap_default(soap);
+	soap_default___ns1__PlayAudioClip(soap, &soap_tmp___ns1__PlayAudioClip);
+	if (!soap_get___ns1__PlayAudioClip(soap, &soap_tmp___ns1__PlayAudioClip, "-ns1:PlayAudioClip", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->PlayAudioClip(soap_tmp___ns1__PlayAudioClip.ns1__PlayAudioClip, ns1__PlayAudioClipResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__PlayAudioClipResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__PlayAudioClipResponse.soap_put(soap, "ns1:PlayAudioClipResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__PlayAudioClipResponse.soap_put(soap, "ns1:PlayAudioClipResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___ns1__GetPlayingAudioClips(struct soap *soap, Media2BindingService *service)
+{	struct __ns1__GetPlayingAudioClips soap_tmp___ns1__GetPlayingAudioClips;
+	_ns1__GetPlayingAudioClipsResponse ns1__GetPlayingAudioClipsResponse;
+	ns1__GetPlayingAudioClipsResponse.soap_default(soap);
+	soap_default___ns1__GetPlayingAudioClips(soap, &soap_tmp___ns1__GetPlayingAudioClips);
+	if (!soap_get___ns1__GetPlayingAudioClips(soap, &soap_tmp___ns1__GetPlayingAudioClips, "-ns1:GetPlayingAudioClips", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->GetPlayingAudioClips(soap_tmp___ns1__GetPlayingAudioClips.ns1__GetPlayingAudioClips, ns1__GetPlayingAudioClipsResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	ns1__GetPlayingAudioClipsResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || ns1__GetPlayingAudioClipsResponse.soap_put(soap, "ns1:GetPlayingAudioClipsResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || ns1__GetPlayingAudioClipsResponse.soap_put(soap, "ns1:GetPlayingAudioClipsResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))

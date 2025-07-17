@@ -55,7 +55,7 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         /// Disables and removes SOAP Header from message by setting soap->header = NULL
         virtual void soap_noheader();
         /// Add SOAP Header to message
-        virtual void soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance);
+        virtual void soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance);
         /// Get SOAP Header structure (i.e. soap->header, which is NULL when absent)
         virtual ::SOAP_ENV__Header *soap_header();
         /// Get SOAP Fault structure (i.e. soap->fault, which is NULL when absent)
@@ -269,6 +269,15 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         virtual int send_SetAudioDecoderConfiguration(const char *soap_endpoint_url, const char *soap_action, _ns1__SetAudioDecoderConfiguration *ns1__SetAudioDecoderConfiguration);
         /// Web service asynchronous operation 'recv_SetAudioDecoderConfiguration' to receive a response message from the connected endpoint, returns SOAP_OK or error code
         virtual int recv_SetAudioDecoderConfiguration(ns1__SetConfigurationResponse &ns1__SetAudioDecoderConfigurationResponse);
+        //
+        /// Web service synchronous operation 'SetEQPreset' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int SetEQPreset(_ns1__SetEQPresetConfiguration *ns1__SetEQPresetConfiguration, ns1__SetConfigurationResponse &ns1__SetEQPresetConfigurationResponse) { return this->SetEQPreset(NULL, NULL, ns1__SetEQPresetConfiguration, ns1__SetEQPresetConfigurationResponse); }
+        /// Web service synchronous operation 'SetEQPreset' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int SetEQPreset(const char *soap_endpoint_url, const char *soap_action, _ns1__SetEQPresetConfiguration *ns1__SetEQPresetConfiguration, ns1__SetConfigurationResponse &ns1__SetEQPresetConfigurationResponse) { return this->send_SetEQPreset(soap_endpoint_url, soap_action, ns1__SetEQPresetConfiguration) || this->recv_SetEQPreset(ns1__SetEQPresetConfigurationResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_SetEQPreset' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_SetEQPreset(const char *soap_endpoint_url, const char *soap_action, _ns1__SetEQPresetConfiguration *ns1__SetEQPresetConfiguration);
+        /// Web service asynchronous operation 'recv_SetEQPreset' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_SetEQPreset(ns1__SetConfigurationResponse &ns1__SetEQPresetConfigurationResponse);
         //
         /// Web service synchronous operation 'GetVideoSourceConfigurationOptions' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
         virtual int GetVideoSourceConfigurationOptions(ns1__GetConfiguration *ns1__GetVideoSourceConfigurationOptions, _ns1__GetVideoSourceConfigurationOptionsResponse &ns1__GetVideoSourceConfigurationOptionsResponse) { return this->GetVideoSourceConfigurationOptions(NULL, NULL, ns1__GetVideoSourceConfigurationOptions, ns1__GetVideoSourceConfigurationOptionsResponse); }
@@ -512,5 +521,59 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         virtual int send_SetWebRTCConfigurations(const char *soap_endpoint_url, const char *soap_action, _ns1__SetWebRTCConfigurations *ns1__SetWebRTCConfigurations);
         /// Web service asynchronous operation 'recv_SetWebRTCConfigurations' to receive a response message from the connected endpoint, returns SOAP_OK or error code
         virtual int recv_SetWebRTCConfigurations(_ns1__SetWebRTCConfigurationsResponse &ns1__SetWebRTCConfigurationsResponse);
+        //
+        /// Web service synchronous operation 'GetAudioClips' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int GetAudioClips(_ns1__GetAudioClips *ns1__GetAudioClips, _ns1__GetAudioClipsResponse &ns1__GetAudioClipsResponse) { return this->GetAudioClips(NULL, NULL, ns1__GetAudioClips, ns1__GetAudioClipsResponse); }
+        /// Web service synchronous operation 'GetAudioClips' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int GetAudioClips(const char *soap_endpoint_url, const char *soap_action, _ns1__GetAudioClips *ns1__GetAudioClips, _ns1__GetAudioClipsResponse &ns1__GetAudioClipsResponse) { return this->send_GetAudioClips(soap_endpoint_url, soap_action, ns1__GetAudioClips) || this->recv_GetAudioClips(ns1__GetAudioClipsResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_GetAudioClips' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_GetAudioClips(const char *soap_endpoint_url, const char *soap_action, _ns1__GetAudioClips *ns1__GetAudioClips);
+        /// Web service asynchronous operation 'recv_GetAudioClips' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_GetAudioClips(_ns1__GetAudioClipsResponse &ns1__GetAudioClipsResponse);
+        //
+        /// Web service synchronous operation 'AddAudioClip' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int AddAudioClip(_ns1__AddAudioClip *ns1__AddAudioClip, _ns1__AddAudioClipResponse &ns1__AddAudioClipResponse) { return this->AddAudioClip(NULL, NULL, ns1__AddAudioClip, ns1__AddAudioClipResponse); }
+        /// Web service synchronous operation 'AddAudioClip' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int AddAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__AddAudioClip *ns1__AddAudioClip, _ns1__AddAudioClipResponse &ns1__AddAudioClipResponse) { return this->send_AddAudioClip(soap_endpoint_url, soap_action, ns1__AddAudioClip) || this->recv_AddAudioClip(ns1__AddAudioClipResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_AddAudioClip' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_AddAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__AddAudioClip *ns1__AddAudioClip);
+        /// Web service asynchronous operation 'recv_AddAudioClip' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_AddAudioClip(_ns1__AddAudioClipResponse &ns1__AddAudioClipResponse);
+        //
+        /// Web service synchronous operation 'SetAudioClip' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int SetAudioClip(_ns1__SetAudioClip *ns1__SetAudioClip, _ns1__SetAudioClipResponse &ns1__SetAudioClipResponse) { return this->SetAudioClip(NULL, NULL, ns1__SetAudioClip, ns1__SetAudioClipResponse); }
+        /// Web service synchronous operation 'SetAudioClip' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int SetAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__SetAudioClip *ns1__SetAudioClip, _ns1__SetAudioClipResponse &ns1__SetAudioClipResponse) { return this->send_SetAudioClip(soap_endpoint_url, soap_action, ns1__SetAudioClip) || this->recv_SetAudioClip(ns1__SetAudioClipResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_SetAudioClip' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_SetAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__SetAudioClip *ns1__SetAudioClip);
+        /// Web service asynchronous operation 'recv_SetAudioClip' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_SetAudioClip(_ns1__SetAudioClipResponse &ns1__SetAudioClipResponse);
+        //
+        /// Web service synchronous operation 'DeleteAudioClip' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int DeleteAudioClip(_ns1__DeleteAudioClip *ns1__DeleteAudioClip, _ns1__DeleteAudioClipResponse &ns1__DeleteAudioClipResponse) { return this->DeleteAudioClip(NULL, NULL, ns1__DeleteAudioClip, ns1__DeleteAudioClipResponse); }
+        /// Web service synchronous operation 'DeleteAudioClip' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int DeleteAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__DeleteAudioClip *ns1__DeleteAudioClip, _ns1__DeleteAudioClipResponse &ns1__DeleteAudioClipResponse) { return this->send_DeleteAudioClip(soap_endpoint_url, soap_action, ns1__DeleteAudioClip) || this->recv_DeleteAudioClip(ns1__DeleteAudioClipResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_DeleteAudioClip' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_DeleteAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__DeleteAudioClip *ns1__DeleteAudioClip);
+        /// Web service asynchronous operation 'recv_DeleteAudioClip' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_DeleteAudioClip(_ns1__DeleteAudioClipResponse &ns1__DeleteAudioClipResponse);
+        //
+        /// Web service synchronous operation 'PlayAudioClip' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int PlayAudioClip(_ns1__PlayAudioClip *ns1__PlayAudioClip, _ns1__PlayAudioClipResponse &ns1__PlayAudioClipResponse) { return this->PlayAudioClip(NULL, NULL, ns1__PlayAudioClip, ns1__PlayAudioClipResponse); }
+        /// Web service synchronous operation 'PlayAudioClip' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int PlayAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__PlayAudioClip *ns1__PlayAudioClip, _ns1__PlayAudioClipResponse &ns1__PlayAudioClipResponse) { return this->send_PlayAudioClip(soap_endpoint_url, soap_action, ns1__PlayAudioClip) || this->recv_PlayAudioClip(ns1__PlayAudioClipResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_PlayAudioClip' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_PlayAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__PlayAudioClip *ns1__PlayAudioClip);
+        /// Web service asynchronous operation 'recv_PlayAudioClip' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_PlayAudioClip(_ns1__PlayAudioClipResponse &ns1__PlayAudioClipResponse);
+        //
+        /// Web service synchronous operation 'GetPlayingAudioClips' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int GetPlayingAudioClips(_ns1__GetPlayingAudioClips *ns1__GetPlayingAudioClips, _ns1__GetPlayingAudioClipsResponse &ns1__GetPlayingAudioClipsResponse) { return this->GetPlayingAudioClips(NULL, NULL, ns1__GetPlayingAudioClips, ns1__GetPlayingAudioClipsResponse); }
+        /// Web service synchronous operation 'GetPlayingAudioClips' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int GetPlayingAudioClips(const char *soap_endpoint_url, const char *soap_action, _ns1__GetPlayingAudioClips *ns1__GetPlayingAudioClips, _ns1__GetPlayingAudioClipsResponse &ns1__GetPlayingAudioClipsResponse) { return this->send_GetPlayingAudioClips(soap_endpoint_url, soap_action, ns1__GetPlayingAudioClips) || this->recv_GetPlayingAudioClips(ns1__GetPlayingAudioClipsResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_GetPlayingAudioClips' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_GetPlayingAudioClips(const char *soap_endpoint_url, const char *soap_action, _ns1__GetPlayingAudioClips *ns1__GetPlayingAudioClips);
+        /// Web service asynchronous operation 'recv_GetPlayingAudioClips' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_GetPlayingAudioClips(_ns1__GetPlayingAudioClipsResponse &ns1__GetPlayingAudioClipsResponse);
     };
 #endif

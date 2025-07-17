@@ -55,7 +55,7 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         /// Disables and removes SOAP Header from message by setting soap->header = NULL
         virtual void soap_noheader();
         /// Add SOAP Header to message
-        virtual void soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance);
+        virtual void soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance);
         /// Get SOAP Header structure (i.e. soap->header, which is NULL when absent)
         virtual ::SOAP_ENV__Header *soap_header();
         /// Get SOAP Fault structure (i.e. soap->fault, which is NULL when absent)
@@ -269,5 +269,14 @@ A commercial use license is available from Genivia Inc., contact@genivia.com
         virtual int send_GetExportRecordedDataState(const char *soap_endpoint_url, const char *soap_action, _trc__GetExportRecordedDataState *trc__GetExportRecordedDataState);
         /// Web service asynchronous operation 'recv_GetExportRecordedDataState' to receive a response message from the connected endpoint, returns SOAP_OK or error code
         virtual int recv_GetExportRecordedDataState(_trc__GetExportRecordedDataStateResponse &trc__GetExportRecordedDataStateResponse);
+        //
+        /// Web service synchronous operation 'OverrideSegmentDuration' with default endpoint and default SOAP Action header, returns SOAP_OK or error code
+        virtual int OverrideSegmentDuration(_trc__OverrideSegmentDuration *trc__OverrideSegmentDuration, _trc__OverrideSegmentDurationResponse &trc__OverrideSegmentDurationResponse) { return this->OverrideSegmentDuration(NULL, NULL, trc__OverrideSegmentDuration, trc__OverrideSegmentDurationResponse); }
+        /// Web service synchronous operation 'OverrideSegmentDuration' to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int OverrideSegmentDuration(const char *soap_endpoint_url, const char *soap_action, _trc__OverrideSegmentDuration *trc__OverrideSegmentDuration, _trc__OverrideSegmentDurationResponse &trc__OverrideSegmentDurationResponse) { return this->send_OverrideSegmentDuration(soap_endpoint_url, soap_action, trc__OverrideSegmentDuration) || this->recv_OverrideSegmentDuration(trc__OverrideSegmentDurationResponse) ? this->soap->error : SOAP_OK; }
+        /// Web service asynchronous operation 'send_OverrideSegmentDuration' to send a request message to the specified endpoint and SOAP Action header, returns SOAP_OK or error code
+        virtual int send_OverrideSegmentDuration(const char *soap_endpoint_url, const char *soap_action, _trc__OverrideSegmentDuration *trc__OverrideSegmentDuration);
+        /// Web service asynchronous operation 'recv_OverrideSegmentDuration' to receive a response message from the connected endpoint, returns SOAP_OK or error code
+        virtual int recv_OverrideSegmentDuration(_trc__OverrideSegmentDurationResponse &trc__OverrideSegmentDurationResponse);
     };
 #endif

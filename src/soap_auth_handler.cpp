@@ -145,7 +145,7 @@ void DefaultAuthHandler::RestoreAuthData(soap* ctx)
 #ifdef WITH_OPENSSL
                 soap_wsse_add_UsernameTokenDigest(ctx, nullptr, auth_handler_impl_->user_name.c_str(), auth_handler_impl_->password.c_str());
 #else
-                soap_wsse_add_UsernameTokenText(ctx, nullptr, mpD->user_name.c_str(), mpD->password.c_str());
+                soap_wsse_add_UsernameTokenText(ctx, nullptr, auth_handler_impl_->user_name.c_str(), auth_handler_impl_->password.c_str());
 #endif
                 soap_wsse_add_Timestamp(ctx, nullptr, 0);
             }

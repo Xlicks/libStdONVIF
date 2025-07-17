@@ -88,7 +88,10 @@ void Media2BindingProxy::Media2BindingProxy_init(soap_mode imode, soap_mode omod
         { "xenc", "http://www.w3.org/2001/04/xmlenc#", NULL, NULL },
         { "wsc", "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512", "http://schemas.xmlsoap.org/ws/2005/02/sc", NULL },
         { "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", NULL },
+        { "wsa", "http://schemas.xmlsoap.org/ws/2004/08/addressing", "http://www.w3.org/2005/08/addressing", NULL },
+        { "wsdd", "http://schemas.xmlsoap.org/ws/2005/04/discovery", NULL, NULL },
         { "chan", "http://schemas.microsoft.com/ws/2005/02/duplex", NULL, NULL },
+        { "wsdd10", "http://tempuri.org/wsdd10.xsd", NULL, NULL },
         { "wsa5", "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing", NULL },
         { "wsrfr", "http://docs.oasis-open.org/wsrf/r-2", NULL, NULL },
         { "ns2", "http://www.onvif.org/ver20/analytics/humanface", NULL, NULL },
@@ -101,6 +104,7 @@ void Media2BindingProxy::Media2BindingProxy_init(soap_mode imode, soap_mode omod
         { "ns1", "http://www.onvif.org/ver20/media/wsdl", NULL, NULL },
         { "tad", "http://www.onvif.org/ver10/analyticsdevice/wsdl", NULL, NULL },
         { "tan", "http://www.onvif.org/ver20/analytics/wsdl", NULL, NULL },
+        { "tdn", "http://www.onvif.org/ver10/network/wsdl", NULL, NULL },
         { "tds", "http://www.onvif.org/ver10/device/wsdl", NULL, NULL },
         { "tev", "http://www.onvif.org/ver10/events/wsdl", NULL, NULL },
         { "wsnt", "http://docs.oasis-open.org/wsn/b-2", NULL, NULL },
@@ -153,10 +157,18 @@ void Media2BindingProxy::soap_noheader()
 {	this->soap->header = NULL;
 }
 
-void Media2BindingProxy::soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
+void Media2BindingProxy::soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
 {
 	::soap_header(this->soap);
 	this->soap->header->wsse__Security = wsse__Security;
+	this->soap->header->wsa__MessageID = wsa__MessageID;
+	this->soap->header->wsa__RelatesTo = wsa__RelatesTo;
+	this->soap->header->wsa__From = wsa__From;
+	this->soap->header->wsa__ReplyTo = wsa__ReplyTo;
+	this->soap->header->wsa__FaultTo = wsa__FaultTo;
+	this->soap->header->wsa__To = wsa__To;
+	this->soap->header->wsa__Action = wsa__Action;
+	this->soap->header->wsdd__AppSequence = wsdd__AppSequence;
 	this->soap->header->wsa5__MessageID = wsa5__MessageID;
 	this->soap->header->wsa5__RelatesTo = wsa5__RelatesTo;
 	this->soap->header->wsa5__From = wsa5__From;
@@ -1357,6 +1369,61 @@ int Media2BindingProxy::recv_SetAudioDecoderConfiguration(ns1__SetConfigurationR
 	 || soap_body_begin_in(soap))
 		return soap_closesock(soap);
 	ns1__SetAudioDecoderConfigurationResponse.soap_get(soap, "ns1:SetAudioDecoderConfigurationResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_SetEQPreset(const char *soap_endpoint_url, const char *soap_action, _ns1__SetEQPresetConfiguration *ns1__SetEQPresetConfiguration)
+{
+	struct __ns1__SetEQPreset soap_tmp___ns1__SetEQPreset;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/SetEQPreset";
+	soap_tmp___ns1__SetEQPreset.ns1__SetEQPresetConfiguration = ns1__SetEQPresetConfiguration;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__SetEQPreset(soap, &soap_tmp___ns1__SetEQPreset);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__SetEQPreset(soap, &soap_tmp___ns1__SetEQPreset, "-ns1:SetEQPreset", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__SetEQPreset(soap, &soap_tmp___ns1__SetEQPreset, "-ns1:SetEQPreset", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_SetEQPreset(ns1__SetConfigurationResponse &ns1__SetEQPresetConfigurationResponse)
+{
+	ns1__SetEQPresetConfigurationResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__SetEQPresetConfigurationResponse.soap_get(soap, "ns1:SetEQPresetConfigurationResponse", NULL);
 	if (soap->error)
 		return soap_recv_fault(soap, 0);
 	if (soap_body_end_in(soap)
@@ -2842,6 +2909,336 @@ int Media2BindingProxy::recv_SetWebRTCConfigurations(_ns1__SetWebRTCConfiguratio
 	 || soap_body_begin_in(soap))
 		return soap_closesock(soap);
 	ns1__SetWebRTCConfigurationsResponse.soap_get(soap, "ns1:SetWebRTCConfigurationsResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_GetAudioClips(const char *soap_endpoint_url, const char *soap_action, _ns1__GetAudioClips *ns1__GetAudioClips)
+{
+	struct __ns1__GetAudioClips soap_tmp___ns1__GetAudioClips;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/GetAudioClips";
+	soap_tmp___ns1__GetAudioClips.ns1__GetAudioClips = ns1__GetAudioClips;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__GetAudioClips(soap, &soap_tmp___ns1__GetAudioClips);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__GetAudioClips(soap, &soap_tmp___ns1__GetAudioClips, "-ns1:GetAudioClips", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__GetAudioClips(soap, &soap_tmp___ns1__GetAudioClips, "-ns1:GetAudioClips", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_GetAudioClips(_ns1__GetAudioClipsResponse &ns1__GetAudioClipsResponse)
+{
+	ns1__GetAudioClipsResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__GetAudioClipsResponse.soap_get(soap, "ns1:GetAudioClipsResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_AddAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__AddAudioClip *ns1__AddAudioClip)
+{
+	struct __ns1__AddAudioClip soap_tmp___ns1__AddAudioClip;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/AddAudioClip";
+	soap_tmp___ns1__AddAudioClip.ns1__AddAudioClip = ns1__AddAudioClip;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__AddAudioClip(soap, &soap_tmp___ns1__AddAudioClip);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__AddAudioClip(soap, &soap_tmp___ns1__AddAudioClip, "-ns1:AddAudioClip", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__AddAudioClip(soap, &soap_tmp___ns1__AddAudioClip, "-ns1:AddAudioClip", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_AddAudioClip(_ns1__AddAudioClipResponse &ns1__AddAudioClipResponse)
+{
+	ns1__AddAudioClipResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__AddAudioClipResponse.soap_get(soap, "ns1:AddAudioClipResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_SetAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__SetAudioClip *ns1__SetAudioClip)
+{
+	struct __ns1__SetAudioClip soap_tmp___ns1__SetAudioClip;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/SetAudioClip";
+	soap_tmp___ns1__SetAudioClip.ns1__SetAudioClip = ns1__SetAudioClip;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__SetAudioClip(soap, &soap_tmp___ns1__SetAudioClip);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__SetAudioClip(soap, &soap_tmp___ns1__SetAudioClip, "-ns1:SetAudioClip", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__SetAudioClip(soap, &soap_tmp___ns1__SetAudioClip, "-ns1:SetAudioClip", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_SetAudioClip(_ns1__SetAudioClipResponse &ns1__SetAudioClipResponse)
+{
+	ns1__SetAudioClipResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__SetAudioClipResponse.soap_get(soap, "ns1:SetAudioClipResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_DeleteAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__DeleteAudioClip *ns1__DeleteAudioClip)
+{
+	struct __ns1__DeleteAudioClip soap_tmp___ns1__DeleteAudioClip;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/DeleteAudioClip";
+	soap_tmp___ns1__DeleteAudioClip.ns1__DeleteAudioClip = ns1__DeleteAudioClip;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__DeleteAudioClip(soap, &soap_tmp___ns1__DeleteAudioClip);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__DeleteAudioClip(soap, &soap_tmp___ns1__DeleteAudioClip, "-ns1:DeleteAudioClip", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__DeleteAudioClip(soap, &soap_tmp___ns1__DeleteAudioClip, "-ns1:DeleteAudioClip", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_DeleteAudioClip(_ns1__DeleteAudioClipResponse &ns1__DeleteAudioClipResponse)
+{
+	ns1__DeleteAudioClipResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__DeleteAudioClipResponse.soap_get(soap, "ns1:DeleteAudioClipResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_PlayAudioClip(const char *soap_endpoint_url, const char *soap_action, _ns1__PlayAudioClip *ns1__PlayAudioClip)
+{
+	struct __ns1__PlayAudioClip soap_tmp___ns1__PlayAudioClip;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/PlayAudioClip";
+	soap_tmp___ns1__PlayAudioClip.ns1__PlayAudioClip = ns1__PlayAudioClip;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__PlayAudioClip(soap, &soap_tmp___ns1__PlayAudioClip);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__PlayAudioClip(soap, &soap_tmp___ns1__PlayAudioClip, "-ns1:PlayAudioClip", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__PlayAudioClip(soap, &soap_tmp___ns1__PlayAudioClip, "-ns1:PlayAudioClip", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_PlayAudioClip(_ns1__PlayAudioClipResponse &ns1__PlayAudioClipResponse)
+{
+	ns1__PlayAudioClipResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__PlayAudioClipResponse.soap_get(soap, "ns1:PlayAudioClipResponse", NULL);
+	if (soap->error)
+		return soap_recv_fault(soap, 0);
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap_closesock(soap);
+	return soap_closesock(soap);
+}
+
+int Media2BindingProxy::send_GetPlayingAudioClips(const char *soap_endpoint_url, const char *soap_action, _ns1__GetPlayingAudioClips *ns1__GetPlayingAudioClips)
+{
+	struct __ns1__GetPlayingAudioClips soap_tmp___ns1__GetPlayingAudioClips;
+	if (soap_endpoint_url != NULL)
+		soap_endpoint = soap_endpoint_url;
+	if (soap_action == NULL)
+		soap_action = "http://www.onvif.org/ver20/media/wsdl/GetPlayingAudioClips";
+	soap_tmp___ns1__GetPlayingAudioClips.ns1__GetPlayingAudioClips = ns1__GetPlayingAudioClips;
+	soap_begin(soap);
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	soap_serialize___ns1__GetPlayingAudioClips(soap, &soap_tmp___ns1__GetPlayingAudioClips);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || soap_put___ns1__GetPlayingAudioClips(soap, &soap_tmp___ns1__GetPlayingAudioClips, "-ns1:GetPlayingAudioClips", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	}
+	if (soap_end_count(soap))
+		return soap->error;
+	if (soap_connect(soap, soap_endpoint, soap_action)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || soap_put___ns1__GetPlayingAudioClips(soap, &soap_tmp___ns1__GetPlayingAudioClips, "-ns1:GetPlayingAudioClips", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap_closesock(soap);
+	return SOAP_OK;
+}
+
+int Media2BindingProxy::recv_GetPlayingAudioClips(_ns1__GetPlayingAudioClipsResponse &ns1__GetPlayingAudioClipsResponse)
+{
+	ns1__GetPlayingAudioClipsResponse.soap_default(soap);
+	if (soap_begin_recv(soap)
+	 || soap_envelope_begin_in(soap)
+	 || soap_recv_header(soap)
+	 || soap_body_begin_in(soap))
+		return soap_closesock(soap);
+	ns1__GetPlayingAudioClipsResponse.soap_get(soap, "ns1:GetPlayingAudioClipsResponse", NULL);
 	if (soap->error)
 		return soap_recv_fault(soap, 0);
 	if (soap_body_end_in(soap)

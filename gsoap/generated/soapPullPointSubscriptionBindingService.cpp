@@ -65,7 +65,10 @@ void PullPointSubscriptionBindingService::PullPointSubscriptionBindingService_in
         { "xenc", "http://www.w3.org/2001/04/xmlenc#", NULL, NULL },
         { "wsc", "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512", "http://schemas.xmlsoap.org/ws/2005/02/sc", NULL },
         { "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", NULL },
+        { "wsa", "http://schemas.xmlsoap.org/ws/2004/08/addressing", "http://www.w3.org/2005/08/addressing", NULL },
+        { "wsdd", "http://schemas.xmlsoap.org/ws/2005/04/discovery", NULL, NULL },
         { "chan", "http://schemas.microsoft.com/ws/2005/02/duplex", NULL, NULL },
+        { "wsdd10", "http://tempuri.org/wsdd10.xsd", NULL, NULL },
         { "wsa5", "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing", NULL },
         { "wsrfr", "http://docs.oasis-open.org/wsrf/r-2", NULL, NULL },
         { "ns2", "http://www.onvif.org/ver20/analytics/humanface", NULL, NULL },
@@ -78,6 +81,7 @@ void PullPointSubscriptionBindingService::PullPointSubscriptionBindingService_in
         { "ns1", "http://www.onvif.org/ver20/media/wsdl", NULL, NULL },
         { "tad", "http://www.onvif.org/ver10/analyticsdevice/wsdl", NULL, NULL },
         { "tan", "http://www.onvif.org/ver20/analytics/wsdl", NULL, NULL },
+        { "tdn", "http://www.onvif.org/ver10/network/wsdl", NULL, NULL },
         { "tds", "http://www.onvif.org/ver10/device/wsdl", NULL, NULL },
         { "tev", "http://www.onvif.org/ver10/events/wsdl", NULL, NULL },
         { "wsnt", "http://docs.oasis-open.org/wsn/b-2", NULL, NULL },
@@ -171,10 +175,18 @@ void PullPointSubscriptionBindingService::soap_noheader()
 {	this->soap->header = NULL;
 }
 
-void PullPointSubscriptionBindingService::soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
+void PullPointSubscriptionBindingService::soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
 {
 	::soap_header(this->soap);
 	this->soap->header->wsse__Security = wsse__Security;
+	this->soap->header->wsa__MessageID = wsa__MessageID;
+	this->soap->header->wsa__RelatesTo = wsa__RelatesTo;
+	this->soap->header->wsa__From = wsa__From;
+	this->soap->header->wsa__ReplyTo = wsa__ReplyTo;
+	this->soap->header->wsa__FaultTo = wsa__FaultTo;
+	this->soap->header->wsa__To = wsa__To;
+	this->soap->header->wsa__Action = wsa__Action;
+	this->soap->header->wsdd__AppSequence = wsdd__AppSequence;
 	this->soap->header->wsa5__MessageID = wsa5__MessageID;
 	this->soap->header->wsa5__RelatesTo = wsa5__RelatesTo;
 	this->soap->header->wsa5__From = wsa5__From;

@@ -65,7 +65,10 @@ void RecordingBindingService::RecordingBindingService_init(soap_mode imode, soap
         { "xenc", "http://www.w3.org/2001/04/xmlenc#", NULL, NULL },
         { "wsc", "http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512", "http://schemas.xmlsoap.org/ws/2005/02/sc", NULL },
         { "wsse", "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd", "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd", NULL },
+        { "wsa", "http://schemas.xmlsoap.org/ws/2004/08/addressing", "http://www.w3.org/2005/08/addressing", NULL },
+        { "wsdd", "http://schemas.xmlsoap.org/ws/2005/04/discovery", NULL, NULL },
         { "chan", "http://schemas.microsoft.com/ws/2005/02/duplex", NULL, NULL },
+        { "wsdd10", "http://tempuri.org/wsdd10.xsd", NULL, NULL },
         { "wsa5", "http://www.w3.org/2005/08/addressing", "http://schemas.xmlsoap.org/ws/2004/08/addressing", NULL },
         { "wsrfr", "http://docs.oasis-open.org/wsrf/r-2", NULL, NULL },
         { "ns2", "http://www.onvif.org/ver20/analytics/humanface", NULL, NULL },
@@ -78,6 +81,7 @@ void RecordingBindingService::RecordingBindingService_init(soap_mode imode, soap
         { "ns1", "http://www.onvif.org/ver20/media/wsdl", NULL, NULL },
         { "tad", "http://www.onvif.org/ver10/analyticsdevice/wsdl", NULL, NULL },
         { "tan", "http://www.onvif.org/ver20/analytics/wsdl", NULL, NULL },
+        { "tdn", "http://www.onvif.org/ver10/network/wsdl", NULL, NULL },
         { "tds", "http://www.onvif.org/ver10/device/wsdl", NULL, NULL },
         { "tev", "http://www.onvif.org/ver10/events/wsdl", NULL, NULL },
         { "wsnt", "http://docs.oasis-open.org/wsn/b-2", NULL, NULL },
@@ -171,10 +175,18 @@ void RecordingBindingService::soap_noheader()
 {	this->soap->header = NULL;
 }
 
-void RecordingBindingService::soap_header(struct _wsse__Security *wsse__Security, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
+void RecordingBindingService::soap_header(struct _wsse__Security *wsse__Security, char *wsa__MessageID, struct wsa__Relationship *wsa__RelatesTo, struct wsa__EndpointReferenceType *wsa__From, struct wsa__EndpointReferenceType *wsa__ReplyTo, struct wsa__EndpointReferenceType *wsa__FaultTo, char *wsa__To, char *wsa__Action, struct wsdd__AppSequenceType *wsdd__AppSequence, char *wsa5__MessageID, struct wsa5__RelatesToType *wsa5__RelatesTo, struct wsa5__EndpointReferenceType *wsa5__From, struct wsa5__EndpointReferenceType *wsa5__ReplyTo, struct wsa5__EndpointReferenceType *wsa5__FaultTo, char *wsa5__To, char *wsa5__Action, struct chan__ChannelInstanceType *chan__ChannelInstance)
 {
 	::soap_header(this->soap);
 	this->soap->header->wsse__Security = wsse__Security;
+	this->soap->header->wsa__MessageID = wsa__MessageID;
+	this->soap->header->wsa__RelatesTo = wsa__RelatesTo;
+	this->soap->header->wsa__From = wsa__From;
+	this->soap->header->wsa__ReplyTo = wsa__ReplyTo;
+	this->soap->header->wsa__FaultTo = wsa__FaultTo;
+	this->soap->header->wsa__To = wsa__To;
+	this->soap->header->wsa__Action = wsa__Action;
+	this->soap->header->wsdd__AppSequence = wsdd__AppSequence;
 	this->soap->header->wsa5__MessageID = wsa5__MessageID;
 	this->soap->header->wsa5__RelatesTo = wsa5__RelatesTo;
 	this->soap->header->wsa5__From = wsa5__From;
@@ -294,6 +306,7 @@ static int serve___trc__GetRecordingJobState(struct soap*, RecordingBindingServi
 static int serve___trc__ExportRecordedData(struct soap*, RecordingBindingService*);
 static int serve___trc__StopExportRecordedData(struct soap*, RecordingBindingService*);
 static int serve___trc__GetExportRecordedDataState(struct soap*, RecordingBindingService*);
+static int serve___trc__OverrideSegmentDuration(struct soap*, RecordingBindingService*);
 
 int RecordingBindingService::dispatch()
 {	return dispatch(this->soap);
@@ -304,8 +317,8 @@ int RecordingBindingService::dispatch(struct soap* soap)
 	RecordingBindingService_init(soap->imode, soap->omode);
 	if (soap->action)
 	{
-		const char *soap_action[] = { "http://www.onvif.org/ver10/recording/wsdl/CreateRecording", "http://www.onvif.org/ver10/recording/wsdl/CreateRecordingJob", "http://www.onvif.org/ver10/recording/wsdl/CreateTrack", "http://www.onvif.org/ver10/recording/wsdl/DeleteRecording", "http://www.onvif.org/ver10/recording/wsdl/DeleteRecordingJob", "http://www.onvif.org/ver10/recording/wsdl/DeleteTrack", "http://www.onvif.org/ver10/recording/wsdl/ExportRecordedData", "http://www.onvif.org/ver10/recording/wsdl/GetExportRecordedDataState", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingConfiguration", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingJobConfiguration", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingJobState", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingJobs", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingOptions", "http://www.onvif.org/ver10/recording/wsdl/GetRecordings", "http://www.onvif.org/ver10/recording/wsdl/GetServiceCapabilities", "http://www.onvif.org/ver10/recording/wsdl/GetTrackConfiguration", "http://www.onvif.org/ver10/recording/wsdl/SetRecordingConfiguration", "http://www.onvif.org/ver10/recording/wsdl/SetRecordingJobConfiguration", "http://www.onvif.org/ver10/recording/wsdl/SetRecordingJobMode", "http://www.onvif.org/ver10/recording/wsdl/SetTrackConfiguration", "http://www.onvif.org/ver10/recording/wsdl/StopExportRecordedData",  };
-		switch (soap_binary_search_string(soap_action, 21, soap->action))
+		const char *soap_action[] = { "http://www.onvif.org/ver10/recording/wsdl/CreateRecording", "http://www.onvif.org/ver10/recording/wsdl/CreateRecordingJob", "http://www.onvif.org/ver10/recording/wsdl/CreateTrack", "http://www.onvif.org/ver10/recording/wsdl/DeleteRecording", "http://www.onvif.org/ver10/recording/wsdl/DeleteRecordingJob", "http://www.onvif.org/ver10/recording/wsdl/DeleteTrack", "http://www.onvif.org/ver10/recording/wsdl/ExportRecordedData", "http://www.onvif.org/ver10/recording/wsdl/GetExportRecordedDataState", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingConfiguration", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingJobConfiguration", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingJobState", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingJobs", "http://www.onvif.org/ver10/recording/wsdl/GetRecordingOptions", "http://www.onvif.org/ver10/recording/wsdl/GetRecordings", "http://www.onvif.org/ver10/recording/wsdl/GetServiceCapabilities", "http://www.onvif.org/ver10/recording/wsdl/GetTrackConfiguration", "http://www.onvif.org/ver10/recording/wsdl/OverrideSegmentDuration", "http://www.onvif.org/ver10/recording/wsdl/SetRecordingConfiguration", "http://www.onvif.org/ver10/recording/wsdl/SetRecordingJobConfiguration", "http://www.onvif.org/ver10/recording/wsdl/SetRecordingJobMode", "http://www.onvif.org/ver10/recording/wsdl/SetTrackConfiguration", "http://www.onvif.org/ver10/recording/wsdl/StopExportRecordedData",  };
+		switch (soap_binary_search_string(soap_action, 22, soap->action))
 		{
 			case 0:	
 				return serve___trc__CreateRecording(soap, this);
@@ -340,14 +353,16 @@ int RecordingBindingService::dispatch(struct soap* soap)
 			case 15:	
 				return serve___trc__GetTrackConfiguration(soap, this);
 			case 16:	
-				return serve___trc__SetRecordingConfiguration(soap, this);
+				return serve___trc__OverrideSegmentDuration(soap, this);
 			case 17:	
-				return serve___trc__SetRecordingJobConfiguration(soap, this);
+				return serve___trc__SetRecordingConfiguration(soap, this);
 			case 18:	
-				return serve___trc__SetRecordingJobMode(soap, this);
+				return serve___trc__SetRecordingJobConfiguration(soap, this);
 			case 19:	
-				return serve___trc__SetTrackConfiguration(soap, this);
+				return serve___trc__SetRecordingJobMode(soap, this);
 			case 20:	
+				return serve___trc__SetTrackConfiguration(soap, this);
+			case 21:	
 				return serve___trc__StopExportRecordedData(soap, this);
 		}
 	}
@@ -394,6 +409,8 @@ int RecordingBindingService::dispatch(struct soap* soap)
 		return serve___trc__StopExportRecordedData(soap, this);
 	if (!soap_match_tag(soap, soap->tag, "trc:GetExportRecordedDataState"))
 		return serve___trc__GetExportRecordedDataState(soap, this);
+	if (!soap_match_tag(soap, soap->tag, "trc:OverrideSegmentDuration"))
+		return serve___trc__OverrideSegmentDuration(soap, this);
 	return soap->error = SOAP_NO_METHOD;
 }
 
@@ -1251,6 +1268,47 @@ static int serve___trc__GetExportRecordedDataState(struct soap *soap, RecordingB
 	 || soap_putheader(soap)
 	 || soap_body_begin_out(soap)
 	 || trc__GetExportRecordedDataStateResponse.soap_put(soap, "trc:GetExportRecordedDataStateResponse", "")
+	 || soap_body_end_out(soap)
+	 || soap_envelope_end_out(soap)
+	 || soap_end_send(soap))
+		return soap->error;
+	return soap_closesock(soap);
+}
+
+static int serve___trc__OverrideSegmentDuration(struct soap *soap, RecordingBindingService *service)
+{	struct __trc__OverrideSegmentDuration soap_tmp___trc__OverrideSegmentDuration;
+	_trc__OverrideSegmentDurationResponse trc__OverrideSegmentDurationResponse;
+	trc__OverrideSegmentDurationResponse.soap_default(soap);
+	soap_default___trc__OverrideSegmentDuration(soap, &soap_tmp___trc__OverrideSegmentDuration);
+	if (!soap_get___trc__OverrideSegmentDuration(soap, &soap_tmp___trc__OverrideSegmentDuration, "-trc:OverrideSegmentDuration", NULL))
+		return soap->error;
+	if (soap_body_end_in(soap)
+	 || soap_envelope_end_in(soap)
+	 || soap_end_recv(soap))
+		return soap->error;
+	soap->error = service->OverrideSegmentDuration(soap_tmp___trc__OverrideSegmentDuration.trc__OverrideSegmentDuration, trc__OverrideSegmentDurationResponse);
+	if (soap->error)
+		return soap->error;
+	soap->encodingStyle = NULL; /* use SOAP literal style */
+	soap_serializeheader(soap);
+	trc__OverrideSegmentDurationResponse.soap_serialize(soap);
+	if (soap_begin_count(soap))
+		return soap->error;
+	if ((soap->mode & SOAP_IO_LENGTH))
+	{	if (soap_envelope_begin_out(soap)
+		 || soap_putheader(soap)
+		 || soap_body_begin_out(soap)
+		 || trc__OverrideSegmentDurationResponse.soap_put(soap, "trc:OverrideSegmentDurationResponse", "")
+		 || soap_body_end_out(soap)
+		 || soap_envelope_end_out(soap))
+			 return soap->error;
+	};
+	if (soap_end_count(soap)
+	 || soap_response(soap, SOAP_OK)
+	 || soap_envelope_begin_out(soap)
+	 || soap_putheader(soap)
+	 || soap_body_begin_out(soap)
+	 || trc__OverrideSegmentDurationResponse.soap_put(soap, "trc:OverrideSegmentDurationResponse", "")
 	 || soap_body_end_out(soap)
 	 || soap_envelope_end_out(soap)
 	 || soap_end_send(soap))
