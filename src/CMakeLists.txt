@@ -2,6 +2,7 @@ set(INC global.h
         onvif_analytics_client.h
         onvif_client.h
         onvif_device_client.h
+        onvif_discovery_client.h
         onvif_display_client.h
         onvif_event_client.h
         onvif_imaging_client.h
@@ -15,12 +16,14 @@ set(INC global.h
         response.h
         soap_auth_handler.h
         soap_context.h
+        soap_helper.h
         topics.h
 )
 
 set(SRC onvif_analytics_client.cpp
         onvif_client.cpp
         onvif_device_client.cpp
+        onvif_discovery_client.cpp
         onvif_display_client.cpp
         onvif_event_client.cpp
         onvif_imaging_client.cpp
@@ -32,6 +35,7 @@ set(SRC onvif_analytics_client.cpp
         onvif_replay_client.cpp
         soap_auth_handler.cpp
         soap_context.cpp
+        soap_helper.cpp
         topics.cpp
 )
 

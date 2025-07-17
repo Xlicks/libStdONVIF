@@ -232,7 +232,7 @@ std::string SoapContext::GetFaultDetail() const
     std::string ret;
     if (context_impl_->soap_ptr->error!= SOAP_OK)
     {
-        if (!*soap_faultdetail(context_impl_->soap_ptr))
+        if (nullptr != *soap_faultdetail(context_impl_->soap_ptr))
         {
             return {*soap_faultdetail(context_impl_->soap_ptr)};
         }
@@ -251,7 +251,7 @@ std::string SoapContext::GetFaultSubCode() const
     std::lock_guard lock(context_impl_->mutex);
     if (context_impl_->soap_ptr->error != SOAP_OK)
     {
-        if (!*soap_faultsubcode(context_impl_->soap_ptr))
+        if (nullptr != *soap_faultsubcode(context_impl_->soap_ptr))
         {
             return {*soap_faultsubcode(context_impl_->soap_ptr)};
         }
